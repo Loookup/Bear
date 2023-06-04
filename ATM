@@ -1,0 +1,218 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <algorithm>
+using namespace std;
+
+class my_Bank {
+
+public:
+    my_Bank () = default;
+    my_Bank (string _PIN) : PIN(_PIN) {};
+    my_Bank (const my_Bank& _my_Bank) : PIN(_my_Bank.PIN) {};
+    my_Bank (const my_Bank&& _my_Bank) : PIN(std::move(_my_Bank.PIN)) {};
+    ~my_Bank() = default;
+    std::map <string, int>& operator[] (int idx){
+        return Accounts[idx];
+    }
+
+    friend std::ostream& operator << (std::ostream& os, const my_Bank& _my_Bank);
+    friend void pipeline (my_Bank& _my_Bank);
+    friend void make_deposit(my_Bank& _my_Bank,int Acc_idx);
+    friend void make_withdraw(my_Bank& _my_Bank,int Acc_idx);
+
+
+private:
+    string PIN;
+    std::vector <std::map <string, int>> Accounts; // Account , Balance
+    long long deposit = 0;
+    bool withdraw = false;
+};
+
+std::ostream& operator << (std::ostream& os, const my_Bank& _my_Bank) {
+
+    cout << "Good Bye !" << endl;
+    cout << "Your PIN : " << _my_Bank.PIN << endl;
+    cout << "There are " << _my_Bank.Accounts.size() << "Accounts " << endl;
+    cout << endl;
+
+    int idx = 1;
+
+    for (auto it = _my_Bank.Accounts.begin(); it != _my_Bank.Accounts.end(); it++){
+        cout << idx << ", " << it->begin()->first << ", balance : " << it->begin()->second << endl;
+    }
+
+    cout << "Thank you for visiting and have a nice day" << endl;
+
+}
+
+
+void make_deposit(my_Bank& _my_Bank,int Acc_idx) {
+
+    bool process = true;
+
+    while(process) {
+
+        long long _deposit = 0;
+
+        cout << "How much would you like to deposit ?" << endl;
+
+        cin >> _deposit;
+
+        _my_Bank.Accounts[Acc_idx].begin()->second += _deposit;
+
+        cout << "Your have deposited : " << _deposit << "so, the balance will "
+             << _my_Bank.Accounts[Acc_idx].begin()->second << endl;
+
+        cout << "Is it correct ? [Y/N] " << endl;
+
+        string YorN;
+
+        cin >> YorN;
+
+        if (YorN == "Y") {
+            cout << "Deposit has complete, back to previous process" << endl;
+            process = false;
+            break;}
+        else {
+            cout << "Go back to deposit process, erase previous process" << endl;
+            _my_Bank.Accounts[Acc_idx].begin()->second -= _deposit;
+            _deposit = 0;
+        }
+
+    }
+
+}
+
+void make_withdraw(my_Bank& _my_Bank,int Acc_idx){
+
+    bool process = true;
+
+    while(process) {
+
+        long long _withdraw = 0;
+
+        cout << "How much would you like to deposit ?" << endl;
+
+        cin >> _withdraw;
+
+        _my_Bank.Accounts[Acc_idx].begin()->second -= _withdraw;
+
+        cout << "Your have withdrawed : " << _withdraw << "so, the balance will "
+             << _my_Bank.Accounts[Acc_idx].begin()->second << endl;
+
+        cout << "Is it correct ? [Y/N] " << endl;
+
+        string YorN;
+
+        cin >> YorN;
+
+        if (YorN == "Y") {
+            cout << "Deposit has complete, back to previous process" << endl;
+            process = false;
+            break;}
+        else {
+            cout << "Go back to deposit process, erase previous process" << endl;
+            _my_Bank.Accounts[Acc_idx].begin()->second += _withdraw;
+            _withdraw = 0;
+        }
+
+    }
+}
+
+void pipeline(my_Bank& _my_Bank) {
+
+    bool pipe_process = true;
+
+    bool Acc_select = true;
+
+    string Acc_idx;
+
+    while (pipe_process) {
+
+        while (Acc_select) {
+
+            cout << "Please Select your Account" << endl;
+
+            cout << "111-1111" << endl;
+            cout << "222-2222" << endl;
+            cout << "333-3333" << endl;
+
+            cin >> Acc_idx;
+
+            if (find(_my_Bank.Accounts.begin(), _my_Bank.Accounts.end(), Acc_idx) != _my_Bank.Accounts.end()) {
+
+                cout << "Your Account is " << _my_Bank.Accounts[Acc_idx].begin()->first << endl;
+                Acc_select = false;
+                break;
+            }
+            else {
+                cout << "Can't find valid Account, Please Enter Again" << endl;
+                Acc_idx.clear();
+            }
+        }
+
+        int choice;
+
+        cout << "Next, Enter your Choice" << endl;
+        cout << " 1 : Balance" << endl;
+        cout << " 2 : Deposit" << endl;
+        cout << " 3 : Withdraw" << endl;
+
+        cin >> choice;
+
+        cout << "Your choice is " << choice << endl;
+
+        string YorN;
+
+        switch (choice) {
+            case 1: {
+                cout << "Your Balance is "<<  _my_Bank.Accounts[Acc_idx]->second << endl;
+                break;
+            }
+
+            case 2: {
+                make_deposit(_my_Bank, Acc_idx);
+                break;
+            }
+
+            case 3: {
+                make_withdraw(_my_Bank, Acc_idx);
+                break;
+            }
+
+            default: {
+                cout << "Invalid Command, Please Enter Again" << endl;
+                break;
+            }
+        }
+
+        cout << "Do you need Another Service [Y/N]? " << endl;
+        cin >> YorN;
+        if (YorN == "Y") {
+            cout << "Go back to previous process" << endl;
+            pipe_process = true;
+        }
+        else {
+            cout << "End of Process" << endl;
+            pipe_process = false;
+            break;
+        }
+    }
+}
+
+int main()
+{
+    cout << "Welcome, this it my bank" << std::endl;
+    cout << "Please Enter your Card" << std::endl;
+
+    string _PIN;
+
+    std::cin >> _PIN;
+
+    my_Bank my_bank(_PIN);
+
+    pipeline(my_bank);
+
+}
